@@ -1,5 +1,17 @@
 <resources>
     <string name="app_name">Achivity</string>
 
-    <string name="log_out">Log Out</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="add_goal">Add Goal</string>
+    <string name="add_goal_hint">Tell about your goal…</string>
+
+    <string name="edit_profile">Edit Profile</string>
+
+    <string name="name">Name</string>
+    <string name="username">Username</string>
+    <string name="bio">Bio</string>
+
+    <string name="done">Done</string>
+    <string name="follow">Follow</string>
+
 </resources>
