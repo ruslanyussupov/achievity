@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Achivity</string>
+    <string name="app_name">Achievity</string>
 
     <string name="sign_out">Sign Out</string>
     <string name="add_goal">Add Goal</string>
@@ -13,5 +13,14 @@
 
     <string name="done">Done</string>
     <string name="follow">Follow</string>
+
+    <string name="pref_goals_liked">com.ruslaniusupov.achievity.GOALS_LIKED</string>
+    <string name="pref_posts_liked">com.ruslaniusupov.achievity.POSTS_LIKED</string>
+    <string name="pref_comments_liked">com.ruslaniusupov.achievity.COMMENTS_LIKED</string>
+    <string name="post">Post</string>
+
+    <string name="discard_changes">Discard changes?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

@@ -1,8 +1,9 @@
 package com.ruslaniusupov.achievity.adapter;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,8 @@ import com.ruslaniusupov.achievity.model.Goal;
 import com.ruslaniusupov.achievity.model.Like;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,6 +62,8 @@ public class GoalsAdapter extends FirestoreAdapter<GoalsAdapter.ViewHolder> {
 
         private FirebaseFirestore mDb;
         private FirebaseAuth mAuth;
+        private Context mContext;
+        private SharedPreferences mPref;
 
         @BindView(R.id.author)TextView mAuthorTv;
         @BindView(R.id.publish_date)TextView mPubDateTv;
@@ -68,14 +73,19 @@ public class GoalsAdapter extends FirestoreAdapter<GoalsAdapter.ViewHolder> {
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            mContext = itemView.getContext();
             mDb = FirebaseFirestore.getInstance();
             mAuth = FirebaseAuth.getInstance();
+            mPref = mContext.getSharedPreferences(mContext.getString(R.string.pref_goals_liked),
+                    Context.MODE_PRIVATE);
         }
 
         void bind(final DocumentSnapshot documentSnapshot,
                   final OnGoalSelectedListener listener) {
 
             Goal goal = documentSnapshot.toObject(Goal.class);
+            final String docId = documentSnapshot.getId();
+            final DocumentReference docRef = documentSnapshot.getReference();
 
             mAuthorTv.setText(goal.getAuthor());
             Date pubDate = goal.getTimestamp();
@@ -84,64 +94,71 @@ public class GoalsAdapter extends FirestoreAdapter<GoalsAdapter.ViewHolder> {
             }
             mBodyTv.setText(goal.getText());
 
-            queryLike(documentSnapshot).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.getResult().isEmpty()) {
-                        mFavBtn.setSelected(false);
-                    } else {
-                        mFavBtn.setSelected(true);
-                    }
-                }
-            });
-
-            queryLikeCounter(documentSnapshot).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.getResult().isEmpty()) {
-                        DocumentReference ref = documentSnapshot.getReference()
-                                .collection(Count.COUNTERS)
-                                .document("like_counter");
-                        Count.createCounter(ref, 10);
-                    }
-                }
-            });
-
-            queryUnlikeCounter(documentSnapshot).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    DocumentReference ref = documentSnapshot.getReference()
-                            .collection(Count.COUNTERS)
-                            .document("unlike_counter");
-                    Count.createCounter(ref, 10);
-                }
-            });
+            if (mPref.contains(docId)) {
+                mFavBtn.setSelected(true);
+            } else {
+                mFavBtn.setSelected(false);
+            }
 
             mFavBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(LOG_TAG, "Fav btn clicked");
 
-                    queryLike(documentSnapshot).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.getResult().isEmpty()) {
-                                mFavBtn.setSelected(true);
-                                documentSnapshot.getReference()
-                                        .collection(Like.LIKES)
-                                        .document().set(new Like(mAuth.getCurrentUser()));
-                                incrementLikeCounter(documentSnapshot);
-                                Log.d(LOG_TAG, "Document added");
-                            } else {
-                                mFavBtn.setSelected(false);
-                                for (DocumentSnapshot snapshot : task.getResult().getDocuments()) {
-                                    snapshot.getReference().delete();
-                                    incrementUnlikeCounter(documentSnapshot);
-                                    Log.d(LOG_TAG, "Document deleted");
+                    if (mPref.contains(docId)) {
+
+                        mFavBtn.setSelected(false);
+
+                        // Delete user from likes list
+                        queryLike(docRef).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                for (DocumentSnapshot snap : task.getResult().getDocuments()) {
+                                    snap.getReference().delete();
+                                }
+                                mPref.edit().remove(docId).apply();
+                            }
+                        });
+
+                        mDb.collection("users_data")
+                                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .collection("goals_likes")
+                                .whereEqualTo("goal_id", docId)
+                                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                for (DocumentSnapshot snap : task.getResult().getDocuments()) {
+                                    snap.getReference().delete();
                                 }
                             }
-                        }
-                    });
+                        });
+
+                        incrementUnlikeCounter(docRef);
+
+                    } else {
+
+                        mFavBtn.setSelected(true);
+
+                        // Add user to likes list
+                        docRef.collection(Like.LIKES).document()
+                                .set(new Like(mAuth.getCurrentUser()))
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                mPref.edit().putBoolean(docId, true).apply();
+                            }
+                        });
+
+                        Map<String, Object> likeData = new HashMap<>();
+                        likeData.put("goal_id", docId);
+
+                        mDb.collection("users_data")
+                                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .collection("goals_likes")
+                                .document().set(likeData);
+
+                        incrementLikeCounter(docRef);
+
+                    }
 
                 }
             });
@@ -155,32 +172,22 @@ public class GoalsAdapter extends FirestoreAdapter<GoalsAdapter.ViewHolder> {
 
         }
 
-        private Query queryLike(DocumentSnapshot documentSnapshot) {
-            return documentSnapshot.getReference()
+        private Query queryLike(DocumentReference documentReference) {
+            return documentReference
                     .collection(Like.LIKES)
                     .whereEqualTo(Like.USER_ID,
                             mAuth.getCurrentUser().getUid());
         }
 
-        private Query queryLikeCounter(DocumentSnapshot documentSnapshot) {
-            return documentSnapshot.getReference()
-                    .collection(Count.COUNTERS);
-        }
-
-        private Query queryUnlikeCounter(DocumentSnapshot documentSnapshot) {
-            return documentSnapshot.getReference()
-                    .collection(Count.COUNTERS);
-        }
-
-        private void incrementLikeCounter(DocumentSnapshot documentSnapshot) {
-            DocumentReference ref = documentSnapshot.getReference()
+        private void incrementLikeCounter(DocumentReference documentReference) {
+            DocumentReference ref = documentReference
                     .collection(Count.COUNTERS)
                     .document("like_counter");
             Count.incrementCounter(ref, 10);
         }
 
-        private void incrementUnlikeCounter(DocumentSnapshot documentSnapshot) {
-            DocumentReference ref = documentSnapshot.getReference()
+        private void incrementUnlikeCounter(DocumentReference documentReference) {
+            DocumentReference ref = documentReference
                     .collection(Count.COUNTERS)
                     .document("unlike_counter");
             Count.incrementCounter(ref, 10);

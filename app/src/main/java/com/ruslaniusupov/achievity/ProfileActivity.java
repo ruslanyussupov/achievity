@@ -1,6 +1,11 @@
 package com.ruslaniusupov.achievity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -8,16 +13,20 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.ruslaniusupov.achievity.adapter.GoalsAdapter;
 import com.ruslaniusupov.achievity.model.Goal;
 
@@ -40,6 +49,7 @@ public class ProfileActivity extends AppCompatActivity implements GoalsAdapter.O
     @BindView(R.id.name)TextView mUserNameTv;
     @BindView(R.id.goals_rv)RecyclerView mGoalsRv;
     @BindView(R.id.toolbar)Toolbar mToolbar;
+    @BindView(R.id.add_goal_fab)FloatingActionButton mAddGoalFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +67,13 @@ public class ProfileActivity extends AppCompatActivity implements GoalsAdapter.O
                 .orderBy("timestamp", Query.Direction.DESCENDING);
         mAdapter = new GoalsAdapter(query, this);
         mGoalsRv.setAdapter(mAdapter);
+
+        mAddGoalFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(ProfileActivity.this, GoalActivity.class));
+            }
+        });
 
     }
 
@@ -87,9 +104,11 @@ public class ProfileActivity extends AppCompatActivity implements GoalsAdapter.O
 
             if (resultCode == RESULT_OK) {
                 Log.d(LOG_TAG, "Logged in as: " + mAuth.getCurrentUser().getEmail());
-                updateUi(mAuth.getCurrentUser());
-            } else {
 
+                updateUi(mAuth.getCurrentUser());
+
+            } else {
+                Log.e(LOG_TAG, response.getError().getMessage());
             }
         }
 
@@ -119,14 +138,6 @@ public class ProfileActivity extends AppCompatActivity implements GoalsAdapter.O
 
     }
 
-/*    public void addGoal() {
-
-        String text = mGoalEt.getText().toString();
-        Goal goal = new Goal(mAuth.getCurrentUser(), text);
-        mDb.collection("goals").document().set(goal);
-
-    }*/
-
     private void updateUi(FirebaseUser firebaseUser) {
 
         if (firebaseUser == null) {
@@ -146,6 +157,13 @@ public class ProfileActivity extends AppCompatActivity implements GoalsAdapter.O
 
         } else {
 
+            SharedPreferences defPref = PreferenceManager.getDefaultSharedPreferences(this);
+            if (!defPref.getBoolean("first_launch", false)) {
+                initUserPrefs(firebaseUser);
+                defPref.edit().putBoolean("first_launch", true).apply();
+
+            }
+
             mUserNameTv.setText(firebaseUser.getDisplayName());
 
         }
@@ -159,6 +177,28 @@ public class ProfileActivity extends AppCompatActivity implements GoalsAdapter.O
 
     private void editProfile() {
         startActivity(new Intent(this, EditProfileActivity.class));
+    }
+
+    private void initUserPrefs(FirebaseUser firebaseUser) {
+
+        final SharedPreferences likedGoalsPref =
+                getSharedPreferences(getString(R.string.pref_goals_liked), Context.MODE_PRIVATE);
+
+        mDb.collection("users_data")
+                .document(firebaseUser.getUid())
+                .collection("goals_likes")
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                SharedPreferences.Editor editor = likedGoalsPref.edit();
+                for (DocumentSnapshot snap : task.getResult().getDocuments()) {
+                    String goalId = (String) snap.get("goal_id");
+                    editor.putBoolean(goalId, true);
+                }
+                editor.apply();
+            }
+        });
+
     }
 
     @Override
