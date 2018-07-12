@@ -1,25 +1,27 @@
 package com.ruslaniusupov.achievity.model;
 
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
 
 public class Comment {
 
+    public static final String FIELD_USER_ID = "userId";
+    public static final String FIELD_AUTHOR = "author";
+    public static final String FIELD_TEXT = "text";
+    public static final String FIELD_TIMESTAMP = "timestamp";
+
     private String userId;
-    private String postId;
     private @ServerTimestamp Date timestamp;
     private String author;
     private String text;
 
     public Comment() {}
 
-    public Comment(FirebaseUser firebaseUser, DocumentSnapshot documentSnapshot, String text) {
+    public Comment(FirebaseUser firebaseUser, String text) {
         this.userId = firebaseUser.getUid();
         this.author = firebaseUser.getDisplayName();
-        this.postId = documentSnapshot.getId();
         this.text = text;
     }
 
@@ -29,14 +31,6 @@ public class Comment {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getPostId() {
-        return postId;
-    }
-
-    public void setPostId(String postId) {
-        this.postId = postId;
     }
 
     public Date getTimestamp() {

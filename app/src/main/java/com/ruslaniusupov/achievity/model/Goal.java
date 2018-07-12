@@ -8,7 +8,10 @@ import java.util.Map;
 
 public class Goal {
 
-    public static final String GOALS = "goals";
+    public static final String FIELD_USER_ID = "userId";
+    public static final String FIELD_AUTHOR = "author";
+    public static final String FIELD_TEXT = "text";
+    public static final String FIELD_TIMESTAMP = "timestamp";
 
     private String userId;
     private @ServerTimestamp Date timestamp;

@@ -6,20 +6,23 @@ import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
 
-public class Post {
+public class Note {
+
+    public static final String FIELD_USER_ID = "userId";
+    public static final String FIELD_TIMESTAMP = "timestamp";
+    public static final String FIELD_AUTHOR = "author";
+    public static final String FIELD_TEXT = "text";
 
     private String userId;
-    private String goalId;
     private @ServerTimestamp Date timestamp;
     private String author;
     private String text;
 
-    public Post() {}
+    public Note() {}
 
-    public Post(FirebaseUser firebaseUser, DocumentSnapshot documentSnapshot, String text) {
+    public Note(FirebaseUser firebaseUser, String text) {
         this.userId = firebaseUser.getUid();
         this.author = firebaseUser.getDisplayName();
-        this.goalId = documentSnapshot.getId();
         this.text = text;
     }
 
@@ -29,14 +32,6 @@ public class Post {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getGoalId() {
-        return goalId;
-    }
-
-    public void setGoalId(String goalId) {
-        this.goalId = goalId;
     }
 
     public Date getTimestamp() {

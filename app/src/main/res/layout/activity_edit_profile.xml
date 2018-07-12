@@ -23,24 +23,8 @@
             android:id="@+id/name_et"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/name"/>
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp">
-
-        <EditText
-            android:id="@+id/username_et"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/username"/>
+            android:hint="@string/name"
+            android:inputType="textPersonName" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -57,7 +41,9 @@
             android:id="@+id/bio_et"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/bio"/>
+            android:maxLength="140"
+            android:hint="@string/bio"
+            android:inputType="textMultiLine" />
 
     </android.support.design.widget.TextInputLayout>
 

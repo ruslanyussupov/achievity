@@ -7,9 +7,9 @@
 
     <string name="edit_profile">Edit Profile</string>
 
-    <string name="name">Name</string>
-    <string name="username">Username</string>
-    <string name="bio">Bio</string>
+    <string name="name">Name (Required)</string>
+    <string name="username">Username (Required)</string>
+    <string name="bio">Bio (Optional)</string>
 
     <string name="done">Done</string>
     <string name="follow">Follow</string>
@@ -22,5 +22,8 @@
     <string name="discard_changes">Discard changes?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+
+    <string name="username_is_taken">Sorry, this username is already taken.</string>
+    <string name="note_hint">Share your progress</string>
 
 </resources>

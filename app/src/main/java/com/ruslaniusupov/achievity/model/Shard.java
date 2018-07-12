@@ -2,6 +2,8 @@ package com.ruslaniusupov.achievity.model;
 
 public class Shard {
 
+    public static final String FIELD_COUNT = "count";
+
     private int count;
 
     public Shard() {}

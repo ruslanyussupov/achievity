@@ -14,15 +14,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.ruslaniusupov.achievity.model.Counter;
 import com.ruslaniusupov.achievity.model.Goal;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class GoalActivity extends AppCompatActivity {
+public class AddGoalActivity extends AppCompatActivity {
 
-    private static final String LOG_TAG = GoalActivity.class.getSimpleName();
+    private static final String TAG = AddGoalActivity.class.getSimpleName();
 
     private Menu mMenu;
     private TextWatcher mTextWatcher;
@@ -81,7 +81,7 @@ public class GoalActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         mMenu = menu;
-        getMenuInflater().inflate(R.menu.goal, menu);
+        getMenuInflater().inflate(R.menu.add_goal, menu);
         menu.findItem(R.id.action_post).setVisible(false);
         return true;
     }
@@ -111,8 +111,7 @@ public class GoalActivity extends AppCompatActivity {
         final Editable goalText = mGoalEt.getText();
         goalText.clearSpans();
 
-        final DocumentReference goalRef = FirebaseFirestore.getInstance().collection(Goal.GOALS)
-                .document();
+        final DocumentReference goalRef = FirestoreHelper.getGoalsReference().document();
 
         goalRef.set(new Goal(FirebaseAuth.getInstance().getCurrentUser(), goalText.toString()))
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -120,12 +119,12 @@ public class GoalActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
 
                         Count.createCounter(goalRef.collection(Count.COUNTERS)
-                                .document("like_counter"), 10);
+                                .document(Counter.DOC_LIKE_COUNTER), 10);
 
                         Count.createCounter(goalRef.collection(Count.COUNTERS)
-                                .document("unlike_counter"), 10);
+                                .document(Counter.DOC_UNLIKE_COUNTER), 10);
 
-                        GoalActivity.this.finish();
+                        AddGoalActivity.this.finish();
                     }
                 });
 

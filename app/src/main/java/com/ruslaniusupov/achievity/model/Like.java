@@ -4,8 +4,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class Like {
 
-    public static final String LIKES = "likes";
-    public static final String USER_ID = "userId";
+    public static final String FIELD_USER_ID = "userId";
 
     private String userId;
 
