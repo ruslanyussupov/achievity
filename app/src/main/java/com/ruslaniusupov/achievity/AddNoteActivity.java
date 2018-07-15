@@ -11,6 +11,7 @@ import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.ruslaniusupov.achievity.firebase.FirestoreHelper;
 import com.ruslaniusupov.achievity.model.Note;
 
 import butterknife.BindView;

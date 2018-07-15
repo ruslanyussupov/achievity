@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.ruslaniusupov.achievity.firebase.FirestoreHelper;
 import com.ruslaniusupov.achievity.model.Counter;
 import com.ruslaniusupov.achievity.model.Goal;
 

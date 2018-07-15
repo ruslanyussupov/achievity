@@ -11,8 +11,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
         <activity
-            android:name=".ProfileActivity"
-            android:launchMode="singleTop">
+            android:name=".EditProfileActivity"
+            android:label="@string/edit_profile"
+            android:parentActivityName=".MainActivity" />
+        <activity android:name=".AddGoalActivity" />
+        <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,16 +23,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".EditProfileActivity"
-            android:label="@string/edit_profile"
-            android:parentActivityName=".ProfileActivity" />
-        <activity android:name=".AddGoalActivity" />
-        <activity android:name=".SplashActivity" />
-        <activity android:name=".NotesActivity"
+            android:name=".NotesActivity"
             android:launchMode="singleTop"
-            android:parentActivityName=".ProfileActivity"/>
-        <activity android:name=".AddNoteActivity"
-            android:parentActivityName=".NotesActivity"/>
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".AddNoteActivity"
+            android:parentActivityName=".NotesActivity" />
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"/>
     </application>
 
 </manifest>

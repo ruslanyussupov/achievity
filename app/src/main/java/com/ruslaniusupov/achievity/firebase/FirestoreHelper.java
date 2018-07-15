@@ -1,4 +1,4 @@
-package com.ruslaniusupov.achievity;
+package com.ruslaniusupov.achievity.firebase;
 
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -8,9 +8,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.ruslaniusupov.achievity.Count;
 import com.ruslaniusupov.achievity.model.Counter;
 import com.ruslaniusupov.achievity.model.Like;
-import com.ruslaniusupov.achievity.model.Note;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +22,13 @@ public class FirestoreHelper {
     public static final String COUNTERS_COLLECTION = "counters";
     public static final String LIKES_COLLECTION = "likes";
     public static final String SHARDS_COLLECTION = "shards";
+    public static final String SUBSCRIBERS_COLLECTION = "subscribers";
+    public static final String SUBSCRIPTIONS_COLLECTION = "subscriptions";
     public static final String NOTES_COLLECTION = "notes";
     public static final String GOALS_LIKED = "goalsLiked";
     public static final String FIELD_BIO = "bio";
     public static final String FIELD_GOAL_ID = "goalId";
+    public static final String FIELD_USER_ID = "userId";
 
     public static DocumentReference getGoalReference(String docId) {
         return FirebaseFirestore.getInstance().collection(GOALS_COLLECTION)
@@ -51,6 +54,14 @@ public class FirestoreHelper {
 
     public static CollectionReference getNotesReference(String goalId) {
         return getGoalReference(goalId).collection(NOTES_COLLECTION);
+    }
+
+    public static CollectionReference getSubscribersReference(DocumentReference docId) {
+        return docId.collection(SUBSCRIBERS_COLLECTION);
+    }
+
+    public static CollectionReference getSubscriptionsReference(FirebaseUser firebaseUser) {
+        return getUserDataReference(firebaseUser).collection(SUBSCRIPTIONS_COLLECTION);
     }
 
     public static DocumentReference getLikeCounter(DocumentReference documentReference) {

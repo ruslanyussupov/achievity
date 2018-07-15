@@ -20,9 +20,9 @@ import com.ruslaniusupov.achievity.model.Note;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class NotesAdapter extends FirestoreRecyclerAdapter<Note, NotesAdapter.ViewHolder> {
+public class FirestoreNotesAdapter extends FirestoreRecyclerAdapter<Note, FirestoreNotesAdapter.ViewHolder> {
 
-    private static final String TAG = NotesAdapter.class.getSimpleName();
+    private static final String TAG = FirestoreNotesAdapter.class.getSimpleName();
 
     /**
      * Create a new RecyclerView adapter that listens to a Firestore Query.  See {@link
@@ -30,7 +30,7 @@ public class NotesAdapter extends FirestoreRecyclerAdapter<Note, NotesAdapter.Vi
      *
      * @param options
      */
-    public NotesAdapter(@NonNull FirestoreRecyclerOptions<Note> options) {
+    public FirestoreNotesAdapter(@NonNull FirestoreRecyclerOptions<Note> options) {
         super(options);
     }
 
