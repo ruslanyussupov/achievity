@@ -8,9 +8,8 @@ import android.view.ViewGroup;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.ruslaniusupov.achievity.R;
-import com.ruslaniusupov.achievity.model.Goal;
+import com.ruslaniusupov.achievity.data.models.Goal;
 
 
 public class FirestoreGoalsAdapter extends FirestoreRecyclerAdapter<Goal, GoalsViewHolder> {

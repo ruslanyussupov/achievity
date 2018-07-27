@@ -11,22 +11,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.ruslaniusupov.achievity.NotesActivity;
 import com.ruslaniusupov.achievity.R;
-import com.ruslaniusupov.achievity.adapter.FirestoreGoalsAdapter;
 import com.ruslaniusupov.achievity.adapter.GoalsAdapter;
 import com.ruslaniusupov.achievity.adapter.OnGoalSelectedListener;
 import com.ruslaniusupov.achievity.firebase.FirestoreHelper;
-import com.ruslaniusupov.achievity.model.Goal;
+import com.ruslaniusupov.achievity.data.models.Goal;
 
 import java.util.ArrayList;
 import java.util.List;

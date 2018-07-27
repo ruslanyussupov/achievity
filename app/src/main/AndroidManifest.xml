@@ -15,7 +15,7 @@
             android:label="@string/edit_profile"
             android:parentActivityName=".MainActivity" />
         <activity android:name=".AddGoalActivity" />
-        <activity android:name=".SplashActivity">
+        <activity android:name=".splash.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

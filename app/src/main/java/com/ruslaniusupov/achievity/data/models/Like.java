@@ -1,4 +1,4 @@
-package com.ruslaniusupov.achievity.model;
+package com.ruslaniusupov.achievity.data.models;
 
 import com.google.firebase.auth.FirebaseUser;
 

@@ -9,8 +9,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.ruslaniusupov.achievity.Count;
-import com.ruslaniusupov.achievity.model.Counter;
-import com.ruslaniusupov.achievity.model.Like;
+import com.ruslaniusupov.achievity.data.models.Counter;
+import com.ruslaniusupov.achievity.data.models.Like;
 
 import java.util.HashMap;
 import java.util.Map;

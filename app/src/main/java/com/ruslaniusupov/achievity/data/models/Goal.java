@@ -1,28 +1,28 @@
-package com.ruslaniusupov.achievity.model;
+package com.ruslaniusupov.achievity.data.models;
 
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
 
-public class Note {
+public class Goal {
 
+    public static final String FIELD_ID = "id";
     public static final String FIELD_USER_ID = "userId";
-    public static final String FIELD_TIMESTAMP = "timestamp";
     public static final String FIELD_AUTHOR = "author";
     public static final String FIELD_TEXT = "text";
+    public static final String FIELD_TIMESTAMP = "timestamp";
 
+    private String id;
     private String userId;
     private @ServerTimestamp Date timestamp;
     private String author;
     private String text;
 
-    public Note() {}
+    public Goal() {}
 
-    public Note(FirebaseUser firebaseUser, String text) {
-        this.userId = firebaseUser.getUid();
-        this.author = firebaseUser.getDisplayName();
+    public Goal(String userId, String author, String text) {
+        this.userId = userId;
+        this.author = author;
         this.text = text;
     }
 
@@ -56,5 +56,13 @@ public class Note {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

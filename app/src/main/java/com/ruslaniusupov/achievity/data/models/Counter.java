@@ -1,4 +1,4 @@
-package com.ruslaniusupov.achievity.model;
+package com.ruslaniusupov.achievity.data.models;
 
 public class Counter {
 

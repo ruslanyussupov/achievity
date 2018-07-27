@@ -14,8 +14,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
-import com.ruslaniusupov.achievity.model.Counter;
-import com.ruslaniusupov.achievity.model.Shard;
+import com.ruslaniusupov.achievity.data.models.Counter;
+import com.ruslaniusupov.achievity.data.models.Shard;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -15,8 +15,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.ruslaniusupov.achievity.firebase.FirestoreHelper;
-import com.ruslaniusupov.achievity.model.Counter;
-import com.ruslaniusupov.achievity.model.Goal;
+import com.ruslaniusupov.achievity.data.models.Counter;
+import com.ruslaniusupov.achievity.data.models.Goal;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

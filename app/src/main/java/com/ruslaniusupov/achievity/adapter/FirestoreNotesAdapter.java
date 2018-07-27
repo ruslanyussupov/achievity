@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.ruslaniusupov.achievity.R;
-import com.ruslaniusupov.achievity.model.Note;
+import com.ruslaniusupov.achievity.data.models.Note;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

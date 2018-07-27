@@ -1,7 +1,8 @@
 package com.ruslaniusupov.achievity.adapter;
 
-import com.google.firebase.firestore.DocumentSnapshot;
+
+import com.ruslaniusupov.achievity.data.models.Goal;
 
 public interface OnGoalSelectedListener {
-    void onGoalSelected(DocumentSnapshot goal);
+    void onGoalSelected(Goal goal);
 }

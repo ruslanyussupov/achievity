@@ -12,14 +12,13 @@ import android.view.ViewGroup;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.ruslaniusupov.achievity.NotesActivity;
 import com.ruslaniusupov.achievity.R;
 import com.ruslaniusupov.achievity.adapter.FirestoreGoalsAdapter;
 import com.ruslaniusupov.achievity.adapter.OnGoalSelectedListener;
 import com.ruslaniusupov.achievity.firebase.FirestoreHelper;
-import com.ruslaniusupov.achievity.model.Goal;
+import com.ruslaniusupov.achievity.data.models.Goal;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

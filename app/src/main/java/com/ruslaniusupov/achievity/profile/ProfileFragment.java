@@ -31,23 +31,28 @@ import com.ruslaniusupov.achievity.EditProfileActivity;
 import com.ruslaniusupov.achievity.NotesActivity;
 import com.ruslaniusupov.achievity.ProfileViewModel;
 import com.ruslaniusupov.achievity.R;
-import com.ruslaniusupov.achievity.SplashActivity;
+import com.ruslaniusupov.achievity.data.GoalsRepository;
+import com.ruslaniusupov.achievity.data.UserDataRepository;
+import com.ruslaniusupov.achievity.data.models.User;
+import com.ruslaniusupov.achievity.splash.SplashActivity;
 import com.ruslaniusupov.achievity.adapter.FirestoreGoalsAdapter;
 import com.ruslaniusupov.achievity.adapter.OnGoalSelectedListener;
 import com.ruslaniusupov.achievity.firebase.FirestoreHelper;
-import com.ruslaniusupov.achievity.model.Goal;
+import com.ruslaniusupov.achievity.data.models.Goal;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ProfileFragment extends Fragment implements OnGoalSelectedListener {
+public class ProfileFragment extends Fragment implements OnGoalSelectedListener, ProfileContract.View {
 
     private static final String TAG = "ProfileFragment";
+    private static final String ARG_USER_ID = "user_id";
 
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore mDb;
-    private FirestoreGoalsAdapter mAdapter;
     private Context mContext;
+    private String mUserId;
+    private ProfileContract.Presenter mPresenter;
 
     @BindView(R.id.name)TextView mNameTv;
     @BindView(R.id.bio)TextView mBioTv;
@@ -55,6 +60,14 @@ public class ProfileFragment extends Fragment implements OnGoalSelectedListener 
     @BindView(R.id.add_goal_fab)FloatingActionButton mAddGoalFab;
 
     public ProfileFragment() {}
+
+    public static ProfileFragment newInstance(String userId) {
+        Bundle args = new Bundle();
+        args.putString(ARG_USER_ID, userId);
+        ProfileFragment profileFragment = new ProfileFragment();
+        profileFragment.setArguments(args);
+        return profileFragment;
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -76,28 +89,8 @@ public class ProfileFragment extends Fragment implements OnGoalSelectedListener 
 
         setHasOptionsMenu(true);
 
-        mDb = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
-
-        updateUi(mAuth.getCurrentUser());
-
-        ProfileViewModel viewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
-        LiveData<DocumentSnapshot> liveData = viewModel.getLiveData();
-        liveData.observe(this, new Observer<DocumentSnapshot>() {
-            @Override
-            public void onChanged(@Nullable DocumentSnapshot documentSnapshot) {
-                mBioTv.setText(documentSnapshot.getString(FirestoreHelper.FIELD_BIO));
-            }
-        });
-
-        Query query = FirestoreHelper.getGoalsReference()
-                .whereEqualTo(Goal.FIELD_USER_ID, mAuth.getCurrentUser().getUid())
-                .orderBy(Goal.FIELD_TIMESTAMP, Query.Direction.DESCENDING);
-        FirestoreRecyclerOptions<Goal> options = new FirestoreRecyclerOptions.Builder<Goal>()
-                .setQuery(query, Goal.class)
-                .build();
-        mAdapter = new FirestoreGoalsAdapter(options, this);
-        mGoalsRv.setAdapter(mAdapter);
+        mUserId = getArguments().getString(ARG_USER_ID);
+        mPresenter = new ProfilePresenter(this, mUserId, new GoalsRepository(), new UserDataRepository());
 
         mAddGoalFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,18 +99,6 @@ public class ProfileFragment extends Fragment implements OnGoalSelectedListener 
             }
         });
 
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        mAdapter.startListening();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mAdapter.stopListening();
     }
 
     @Override
@@ -132,7 +113,7 @@ public class ProfileFragment extends Fragment implements OnGoalSelectedListener 
 
         switch (itemId) {
             case R.id.action_sign_out:
-                signOut();
+                mPresenter.signOut();
                 return true;
             case R.id.action_edit_profile:
                 editProfile();
@@ -141,18 +122,6 @@ public class ProfileFragment extends Fragment implements OnGoalSelectedListener 
                 return super.onOptionsItemSelected(item);
         }
 
-    }
-
-    private void updateUi(FirebaseUser firebaseUser) {
-
-        mNameTv.setText(firebaseUser.getDisplayName());
-
-    }
-
-    private void signOut() {
-        AuthUI.getInstance().signOut(mContext);
-        startActivity(new Intent(mContext, SplashActivity.class));
-        getActivity().finish();
     }
 
     private void editProfile() {
@@ -166,4 +135,38 @@ public class ProfileFragment extends Fragment implements OnGoalSelectedListener 
         startActivity(startNotesActivity);
     }
 
+    @Override
+    public void setLoadingIndicator(boolean active) {
+
+    }
+
+    @Override
+    public void showGoals(List<Goal> goals) {
+
+    }
+
+    @Override
+    public void showUserData(User user) {
+        mNameTv.setText(user.getFullName());
+        mBioTv.setText(user.getBio());
+    }
+
+    @Override
+    public void showLoadingGoalsError() {
+
+    }
+
+    @Override
+    public void showNoGoals() {
+
+    }
+
+    @Override
+    public void setAddGoalBtn(boolean active) {
+        if (active) {
+            mAddGoalFab.setVisibility(View.VISIBLE);
+        } else {
+            mAddGoalFab.setVisibility(View.GONE);
+        }
+    }
 }

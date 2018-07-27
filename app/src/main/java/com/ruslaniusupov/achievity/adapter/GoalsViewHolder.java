@@ -1,37 +1,25 @@
 package com.ruslaniusupov.achievity.adapter;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.ruslaniusupov.achievity.R;
-import com.ruslaniusupov.achievity.firebase.FirestoreHelper;
-import com.ruslaniusupov.achievity.model.Goal;
+import com.ruslaniusupov.achievity.data.GoalsLikedPrefsRepository;
+import com.ruslaniusupov.achievity.data.GoalsRepository;
+import com.ruslaniusupov.achievity.data.SubscriptionsPrefsRepository;
+import com.ruslaniusupov.achievity.data.UserDataRepository;
+import com.ruslaniusupov.achievity.data.models.Goal;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-class GoalsViewHolder extends RecyclerView.ViewHolder {
+class GoalsViewHolder extends RecyclerView.ViewHolder implements GoalsViewHolderContract.View {
 
-    private FirebaseUser mUser;
-    private Context mContext;
-    private SharedPreferences mGoalsLikedPref;
-    private SharedPreferences mSubscriptionsPref;
-    private boolean mIsLiked;
-    private boolean mIsSubscribed;
+    private final GoalsViewHolderContract.Presenter mPresenter;
 
     @BindView(R.id.author)TextView mAuthorTv;
     @BindView(R.id.publish_date)TextView mPubDateTv;
@@ -39,89 +27,39 @@ class GoalsViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.fav_btn)ImageButton mFavBtn;
     @BindView(R.id.notifications_btn)ImageButton mNotificationsBtn;
 
-    public GoalsViewHolder(View itemView) {
+    GoalsViewHolder(View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
-        mContext = itemView.getContext();
-        mUser = FirebaseAuth.getInstance().getCurrentUser();
-        mGoalsLikedPref = mContext.getSharedPreferences(mContext.getString(R.string.pref_goals_liked),
-                Context.MODE_PRIVATE);
-        mSubscriptionsPref = mContext.getSharedPreferences(mContext.getString(R.string.pref_subscriptions),
-                Context.MODE_PRIVATE);
+        mPresenter = new GoalsViewHolderPresenter(this, new UserDataRepository(),
+                new GoalsLikedPrefsRepository(itemView.getContext()),
+                new SubscriptionsPrefsRepository(itemView.getContext()),
+                new GoalsRepository());
     }
 
-    void bind(final DocumentSnapshot documentSnapshot,
-              final OnGoalSelectedListener listener) {
-
-        Goal goal = documentSnapshot.toObject(Goal.class);
-        final DocumentReference docRef = documentSnapshot.getReference();
-        final String docId = docRef.getId();
+    void bind(final Goal goal, final OnGoalSelectedListener listener) {
 
         mAuthorTv.setText(goal.getAuthor());
         Date pubDate = goal.getTimestamp();
         mPubDateTv.setText(pubDate.toString());
         mBodyTv.setText(goal.getText());
 
-        // Update fav button state
-        if (mGoalsLikedPref.contains(docId)) {
-            mIsLiked = true;
-            mFavBtn.setSelected(true);
-        } else {
-            mIsLiked = false;
-            mFavBtn.setSelected(false);
-        }
-
-        // Update notifications button state
-        if (mSubscriptionsPref.contains(docId)) {
-            mIsSubscribed = true;
-            mNotificationsBtn.setSelected(true);
-        } else {
-            mIsSubscribed = false;
-            mNotificationsBtn.setSelected(false);
-        }
+        mPresenter.initButtonsState(goal.getId());
 
         mFavBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (mIsLiked) {
+                if (mFavBtn.isSelected()) {
 
                     mFavBtn.setSelected(false);
 
-                    // Delete Like from goals/{goalId}/likes/
-                    FirestoreHelper.deleteLike(FirestoreHelper.getLikesReference(docId),
-                            mUser);
-
-                    // Delete Goal's ID from userData/{userId}/goalsLiked/
-                    FirestoreHelper.deleteItemFromLikeList(FirestoreHelper.getGoalsLiked(mUser),
-                            docId, new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    // Delete liked goal from local user data
-                                    mGoalsLikedPref.edit().remove(docId).apply();
-                                }
-                            });
-
-                    FirestoreHelper.incrementUnlikeCounter(docRef, 10);
+                    mPresenter.cancelLike(goal.getId());
 
                 } else {
 
                     mFavBtn.setSelected(true);
 
-                    // Add Like to goals/{goalId}/likes/
-                    FirestoreHelper.addLike(FirestoreHelper.getLikesReference(docId), mUser);
-
-                    // Add Goal's ID to userData/{userId}/goalsLiked/
-                    FirestoreHelper.addItemToLikeList(FirestoreHelper.getGoalsLiked(mUser),
-                            docId, new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    mGoalsLikedPref.edit().putBoolean(docId, true).apply();
-                                }
-                            });
-
-
-                    FirestoreHelper.incrementLikeCounter(docRef, 10);
+                    mPresenter.like(goal.getId());
 
                 }
 
@@ -132,61 +70,17 @@ class GoalsViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void onClick(View v) {
 
-                if (mIsSubscribed) {
+                if (mNotificationsBtn.isSelected()) {
 
                     mNotificationsBtn.setSelected(false);
 
-                    // Delete user from subscribers collection
-                    FirestoreHelper.getSubscribersReference(docRef)
-                            .whereEqualTo(FirestoreHelper.FIELD_USER_ID, mUser.getUid())
-                            .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            for (DocumentSnapshot snap : queryDocumentSnapshots) {
-                                snap.getReference().delete();
-                            }
-                        }
-                    });
-
-                    // Delete goal from subscriptions collection
-                    FirestoreHelper.getSubscriptionsReference(mUser)
-                            .whereEqualTo(FirestoreHelper.FIELD_GOAL_ID, docId)
-                            .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            SharedPreferences.Editor prefEditor = mSubscriptionsPref.edit();
-                            for (DocumentSnapshot snap : queryDocumentSnapshots) {
-                                snap.getReference().delete();
-                                // Remove goal from subscriptions prefs
-                                prefEditor.remove(docId);
-                            }
-                            prefEditor.apply();
-                        }
-                    });
+                    mPresenter.unsubscribe(goal.getId());
 
                 } else {
 
                     mNotificationsBtn.setSelected(true);
 
-                    // Add user to subscribers collection
-                    Map<String, Object> subscriber = new HashMap<>();
-                    subscriber.put(FirestoreHelper.FIELD_USER_ID, mUser.getUid());
-                    FirestoreHelper.getSubscribersReference(docRef)
-                            .document().set(subscriber);
-
-                    // Add goal to subscriptions collection
-                    Map<String, Object> subscription = new HashMap<>();
-                    subscription.put(FirestoreHelper.FIELD_GOAL_ID, docId);
-                    FirestoreHelper.getSubscriptionsReference(mUser)
-                            .document()
-                            .set(subscription)
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    // Add goal to subscriptions prefs
-                                    mSubscriptionsPref.edit().putBoolean(docId, true).apply();
-                                }
-                            });
+                    mPresenter.subscribe(goal.getId());
                 }
 
             }
@@ -195,10 +89,19 @@ class GoalsViewHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onGoalSelected(documentSnapshot);
+                listener.onGoalSelected(goal);
             }
         });
 
     }
 
+    @Override
+    public void setLikeBtnState(boolean isSelected) {
+        mFavBtn.setSelected(isSelected);
+    }
+
+    @Override
+    public void setSubscribeBtnState(boolean isSelected) {
+        mNotificationsBtn.setSelected(isSelected);
+    }
 }
